@@ -45,8 +45,9 @@ async def get_all_questions(id: str):
 
 @app.post("/question")
 async def post_question(question: Question):
-    open_AI_service = OpenAIService()
-    answer = open_AI_service.ask_question(question.question, '')
+    open_AI_service = OpenAIService(collections['question_bank'])
+    #TODO: API KEY
+    answer = open_AI_service.ask_question(question.question, question.question_parent_id, '')
 
     question_bank = collections['question_bank']
     node_id = question_bank.push({'question': question.question, 'answer': answer, 'parent': question.question_parent_id })
@@ -54,7 +55,14 @@ async def post_question(question: Question):
         'question': question.question,
         'answer': answer,
         'parent_id': question.question_parent_id,
-        'node_id': json_util.dumps(node_id)
+        'node_id': str(node_id)
     }
     return res
+
+
+@app.delete("/question/{id}", status_code=200)
+async def delete_question(id: int | str):
+    question_bank = collections['question_bank']
+    deleted = question_bank.delete_from_id(str(id))
+    return  200 if deleted else 404
 

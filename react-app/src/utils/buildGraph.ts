@@ -62,3 +62,13 @@ export function getPathToNode(root: ProcessedGraphNode, _id: string): string[] {
   dfs(root);
   return path;
 }
+
+// TODO: FIND A WAY TO REBUILD GRAPH
+export function deleteNodeFromGraph(roots: ProcessedGraphNode, id: string): ProcessedGraphNode {
+  const q = [roots]
+
+  while (q.length) {
+    const root = q.shift()
+  }
+
+}

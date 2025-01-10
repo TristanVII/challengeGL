@@ -22,6 +22,11 @@ class MdbCollection(ABC):
     def get_from_id(self, id):
         return self.collection.find_one({'_id': ObjectId(id)})
 
+    # TODO: DELETE NEEDS TO ALSO DELETE ALL CHILDREN
+    def delete_from_id(self, id):
+        deleted =  self.collection.delete_one({'_id': ObjectId(id)})
+        return deleted.acknowledged
+
     def get_all(self):
         return list(self.collection.find())
 
@@ -33,6 +38,7 @@ class QuestionBank(MdbCollection):
     def push(self, obj):
         result = self.collection.insert_one(obj)
         result_id = result.inserted_id
+        return result_id
 
 
 
