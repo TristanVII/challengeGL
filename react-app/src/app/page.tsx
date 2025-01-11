@@ -9,7 +9,7 @@ import {
 } from "@/utils/buildGraph";
 import { GraphVisualization } from "@/components/GraphVisualization";
 import { QuestionForm } from "@/components/QuestionForm";
-import { FloatingQuestionIcon } from "@/components/floatingQuestionIcon";
+import { NodeCreator } from "@/components/NodeCreator";
 import {
   checkLocalStorageKey,
   setLocalStorageKeyValue,
@@ -85,6 +85,7 @@ const LOCAL_STORAGE_KEY = "treeGPT_API_KEY";
 // ];
 
 export default function Home() {
+  // TODO: USE REDUX FOR ROOT MANAGEMENT
   const [roots, setRoots] = useState<ProcessedGraphNode[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string>("");
@@ -197,6 +198,8 @@ export default function Home() {
       )
     : null;
 
+  const createDebugNode = () => console.log('debug node created')
+
   return (
     <main className="relative w-screen h-screen overflow-hidden">
       <GraphVisualization
@@ -214,10 +217,19 @@ export default function Home() {
         onhandleSuccesfullResponse={handleSuccesfullResponse}
       />
       {}
-      <FloatingQuestionIcon
-        onClick={toggleQuestionForm}
-        hidden={isQuestionFormVisible}
-      />
+      <div className="fixed top-4 right-4 flex flex-col space-y-2">
+
+        <NodeCreator
+          title={"ChatGPT Node"}
+          onClick={toggleQuestionForm}
+          hidden={isQuestionFormVisible}
+        />
+        <NodeCreator
+          title={"Debug Node"}
+          onClick={createDebugNode}
+          hidden={isQuestionFormVisible}
+        />
+      </div>
     </main>
   );
 }
