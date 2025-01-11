@@ -11,7 +11,7 @@ import ReactFlow, {
   MiniMap,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { ProcessedGraphNode } from "@/utils/buildGraph";
+import { GPTNode, ProcessedGraphNode } from "@/utils/buildGraph";
 
 interface GraphVisualizationProps {
   roots: ProcessedGraphNode[];
@@ -31,17 +31,18 @@ export function GraphVisualization({
   }>({});
 
   const processNodes = useCallback(
-    (node: ProcessedGraphNode, x = 0, y = 0, level = 0): [Node[], Edge[]] => {
+    // TODO ANY FOR NOW
+    (node: ProcessedGraphNode<GPTNode | any>, x = 0, y = 0, level = 0): [Node[], Edge[]] => {
       const nodes: Node[] = [];
       const edges: Edge[] = [];
 
-      const storedPosition = nodePositions[node._id];
+      const storedPosition = nodePositions[node.node._id];
       const newNode: Node = {
-        id: node._id,
-        data: { label: node.question },
+        id: node.node._id,
+        data: { label: node.node.question },
         position: storedPosition || { x, y },
         style: {
-          background: highlightedPath.includes(node._id)
+          background: highlightedPath.includes(node.node._id)
             ? "#84d18a"
             : "#ffffff",
           border: "1px solid #000000",
@@ -69,13 +70,13 @@ export function GraphVisualization({
         nodes.push(...childNodes);
         edges.push(...childEdges);
         edges.push({
-          id: `${node._id}-${childNode._id}`,
-          source: node._id,
-          target: childNode._id,
+          id: `${node.node._id}-${childNode.node._id}`,
+          source: node.node._id,
+          target: childNode.node._id,
           style: {
             stroke:
-              highlightedPath.includes(node._id) &&
-              highlightedPath.includes(childNode._id)
+              highlightedPath.includes(node.node._id) &&
+              highlightedPath.includes(childNode.node._id)
                 ? "#84d18a"
                 : "#000000",
           },

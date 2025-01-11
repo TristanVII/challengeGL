@@ -1,21 +1,29 @@
-export interface GraphNode {
+export interface Node {
   _id: string;
-  question: string;
-  answer: string;
   children: string[];
   parent?: string | null;
 }
 
-export interface ProcessedGraphNode extends GraphNode {
+export interface DebugNode extends Node {
+  debug?: boolean;
+}
+
+export interface GPTNode extends Node {
+  question: string;
+  answer: string;
+}
+
+export interface ProcessedGraphNode<T extends Node = Node> {
+  node: T;
   childNodes: ProcessedGraphNode[];
 }
 
-export function buildGraph(data: GraphNode[]): ProcessedGraphNode[] {
+export function buildGraph(data: GPTNode[]): ProcessedGraphNode[] {
   const nodeMap = new Map<string, ProcessedGraphNode>();
 
   // Create a map of all nodes
   data.forEach((node) => {
-    nodeMap.set(node._id, { ...node, childNodes: [] });
+    nodeMap.set(node._id, { node, childNodes: [] });
   });
 
   // Build the tree structure
@@ -36,9 +44,9 @@ export function buildGraph(data: GraphNode[]): ProcessedGraphNode[] {
 
 export function findNodeById(
   root: ProcessedGraphNode,
-  _id: string
+  _id: string,
 ): ProcessedGraphNode | null {
-  if (root._id === _id) return root;
+  if (root.node._id === _id) return root;
   for (const child of root.childNodes) {
     const found = findNodeById(child, _id);
     if (found) return found;
@@ -50,8 +58,8 @@ export function getPathToNode(root: ProcessedGraphNode, _id: string): string[] {
   const path: string[] = [];
 
   function dfs(node: ProcessedGraphNode): boolean {
-    path.push(node._id);
-    if (node._id === _id) return true;
+    path.push(node.node._id);
+    if (node.node._id === _id) return true;
     for (const child of node.childNodes) {
       if (dfs(child)) return true;
     }
@@ -63,12 +71,19 @@ export function getPathToNode(root: ProcessedGraphNode, _id: string): string[] {
   return path;
 }
 
-// TODO: FIND A WAY TO REBUILD GRAPH
-export function deleteNodeFromGraph(roots: ProcessedGraphNode, id: string): ProcessedGraphNode {
-  const q = [roots]
-
-  while (q.length) {
-    const root = q.shift()
+export function spawnDebugNode(roots: ProcessedGraphNode[]): DebugNode | null {
+  const valid = roots.every((node) => node.node._id !== "DEBUG_NODE");
+  if (valid) {
+    return { _id: "DEBUG_NODE", children: [] };
   }
-
+  return null;
 }
+
+// TODO: FIND A WAY TO REBUILD GRAPH
+// export function deleteNodeFromGraph(roots: ProcessedGraphNode, id: string): ProcessedGraphNode {
+//   const q = [roots]
+//
+//   while (q.length) {
+//     const root = q.shift()
+//   }
+// }

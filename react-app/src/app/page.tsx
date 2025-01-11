@@ -6,6 +6,8 @@ import {
   ProcessedGraphNode,
   findNodeById,
   getPathToNode,
+  GPTNode,
+  spawnDebugNode,
 } from "@/utils/buildGraph";
 import { GraphVisualization } from "@/components/GraphVisualization";
 import { QuestionForm } from "@/components/QuestionForm";
@@ -16,6 +18,7 @@ import {
 } from "@/utils/localStorage";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import { formatQuestionResponse } from "@/utils/data";
+import { deflate } from "zlib";
 
 const LOCAL_STORAGE_KEY = "treeGPT_API_KEY";
 
@@ -86,7 +89,7 @@ const LOCAL_STORAGE_KEY = "treeGPT_API_KEY";
 
 export default function Home() {
   // TODO: USE REDUX FOR ROOT MANAGEMENT
-  const [roots, setRoots] = useState<ProcessedGraphNode[]>([]);
+  const [roots, setRoots] = useState<ProcessedGraphNode<any>[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string>("");
   const [highlightedPath, setHighlightedPath] = useState<string[]>([]);
@@ -163,13 +166,16 @@ export default function Home() {
     parent_id: string | null;
   }) => {
     const { question, answer, node_id, parent_id } = params;
-    const newNode: ProcessedGraphNode = {
-      _id: node_id,
+    const gptNode: GPTNode = {
       question,
       answer,
+      _id: node_id,
       children: [],
-      childNodes: [],
       parent: parent_id,
+    };
+    const newNode: ProcessedGraphNode<GPTNode> = {
+      node: gptNode,
+      childNodes: [],
     };
 
     if (parent_id) {
@@ -186,8 +192,8 @@ export default function Home() {
       setRoots([...roots, newNode]);
     }
 
-    setSelectedNodeId(newNode._id);
-    setHighlightedPath([newNode._id]);
+    setSelectedNodeId(newNode.node._id);
+    setHighlightedPath([newNode.node._id]);
   };
   const toggleQuestionForm = () => setIsQuestionFormVisible((prev) => !prev);
 
@@ -198,7 +204,13 @@ export default function Home() {
       )
     : null;
 
-  const createDebugNode = () => console.log('debug node created')
+  const createDebugNode = () => {
+    const debugNode = spawnDebugNode(roots)
+    if (debugNode) {
+      // ADD NODE STYLE and onclick
+      setRoots([...roots, {node: debugNode, childNodes: []}]);
+    }
+  } 
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
@@ -218,7 +230,6 @@ export default function Home() {
       />
       {}
       <div className="fixed top-4 right-4 flex flex-col space-y-2">
-
         <NodeCreator
           title={"ChatGPT Node"}
           onClick={toggleQuestionForm}
