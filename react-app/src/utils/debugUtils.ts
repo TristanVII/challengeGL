@@ -1,3 +1,5 @@
+import { API_URL } from "../service/Question";
+
 type TrafficEntry = {
   type: "HTTP" | "WebSocket";
   method?: string;
@@ -10,6 +12,11 @@ type TrafficEntry = {
 
 export class DebugUtils {
   private trafficLog: TrafficEntry[] = [];
+  private debugId: string | null = null;
+
+  setDebugId(debugId: string) {
+    this.debugId = debugId;
+  }
 
   interceptFetch() {
     const originalFetch = window.fetch;
@@ -52,7 +59,7 @@ export class DebugUtils {
     // Create a download link
     const a = document.createElement("a");
     a.href = url;
-    a.download = "traffic-log.json";
+    a.download = `client-logs-${this.debugId}.json`;
     a.click();
 
     // Clean up memory
@@ -82,7 +89,7 @@ export class DebugUtils {
         // Create a download link for the recorded video
         const a = document.createElement("a");
         a.href = url;
-        a.download = "screen-debug.webm";
+        a.download = `screen-debug-${this.debugId}.webm`;
         a.click();
 
         // Clean up memory
@@ -96,6 +103,21 @@ export class DebugUtils {
       console.error("Error accessing screen capture:", error);
       throw error;
     }
+  };
+
+  downloadServerLogs = async (debug_id: string | null) => {
+    if (!debug_id) return;
+    const request = new Request(`${API_URL}/debug/${debug_id}`, {
+      method: "GET",
+    });
+    const response = await fetch(request);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `server-logs-${this.debugId}.json`;
+    a.click();
   };
 }
 

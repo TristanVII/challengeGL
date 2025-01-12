@@ -15,7 +15,7 @@ export enum Status {
 }
 
 // TODO NO SERVER SIDE AUTH ATM
-const API_URL = "http://127.0.0.1:8000";
+export const API_URL = "http://127.0.0.1:8000";
 
 export async function fetchQuestions(userId: string): Promise<Question[]> {
   if (userId) {
@@ -30,13 +30,18 @@ export async function fetchQuestions(userId: string): Promise<Question[]> {
   return [];
 }
 
-export async function postQuestion(userId: string, question: AppNode) {
+export async function postQuestion(
+  userId: string,
+  question: AppNode,
+  debug_id?: string | null
+) {
   const body = {
     user_id: userId,
     question: question.data.pending_question,
     question_parent_id: question.id,
     model: "",
     key: "",
+    debug_id: debug_id,
   };
 
   console.log(body);

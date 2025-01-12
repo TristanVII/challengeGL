@@ -8,7 +8,10 @@ export type QuestionNode = Node<
     label: string;
     parent?: string;
     pending_question?: string;
-    func?: (question: QuestionNode) => Promise<Response>;
+    func?: (
+      question: QuestionNode,
+      debug_id?: string | null
+    ) => Promise<Response>;
   },
   "question-node"
 >;

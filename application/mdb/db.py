@@ -73,6 +73,16 @@ class QuestionBank(MdbCollection):
             print("No document was updated.")
 
 
+class FeedbackBank(MdbCollection):
+    def __init__(self, collection):
+        super().__init__(collection)
+
+    def push(self, obj):
+        print("PUSHING FEEDBACK", obj)
+        result = self.collection.insert_one(obj)
+        return result.inserted_id
+
+
 class MongoDB:
     def __init__(self, client) -> None:
         self.client = pymongo.MongoClient(client)
@@ -82,3 +92,7 @@ class MongoDB:
     def get_question_bank(self) -> QuestionBank:
         collection = self.db['question_bank']
         return QuestionBank(collection)
+
+    def get_feedback_bank(self) -> FeedbackBank:
+        collection = self.db['feedback_bank']
+        return FeedbackBank(collection)

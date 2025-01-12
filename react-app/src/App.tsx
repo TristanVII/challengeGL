@@ -5,6 +5,7 @@ import {
   useNodesState,
   useEdgesState,
   Node,
+  Panel,
 } from "@xyflow/react";
 
 // https://www.npmjs.com/package/@fingerprintjs/fingerprintjs
@@ -23,6 +24,8 @@ import { AppNode, DebugNode } from "./nodes/types";
 import { LeftSideBar } from "./components/LeftSideBar";
 import { NodeSelector } from "./components/NodeSelector";
 import { DebugUtils } from "./utils/debugUtils";
+import FeedBackFlow from "./components/FeedBackFlow";
+import { postFeedBack } from "./service/FeedBack";
 
 const initialEdges = [
   { id: "e1-2", source: "a", target: "c" },
@@ -39,6 +42,7 @@ export default function App() {
   const [selectedNode, setSelectedNode] = useState<AppNode | null>(null);
   const [pending_nodes, setPendingNodes] = useState<AppNode[]>([]);
   const [debugNode, setDebugNode] = useState<DebugNode | null>(null);
+  const [isFeedBackFlowOpen, setIsFeedBackFlowOpen] = useState(false);
   useEffect(() => {
     async function fetchInitNodes() {
       const fpPromise = FingerprintJS.load();
@@ -73,7 +77,7 @@ export default function App() {
         label: "New Question",
         question: "New Question",
         answer: "",
-        func: (node) => postQuestion(userId, node),
+        func: (node, debug_id) => postQuestion(userId, node, debug_id),
       },
     };
     console.log(newNode);
@@ -123,6 +127,28 @@ export default function App() {
     setPendingNodes((nodes) => nodes.filter((n) => n.id !== node.id));
   };
 
+  // Kinda hard coded for now
+  const submitFeedBack = (feedback: {
+    question1: string;
+    question2: string;
+    question3: string;
+  }) => {
+    console.log(feedback);
+    postFeedBack(feedback, userId)
+      .then(() => {
+        console.log("Feedback submitted");
+      })
+      .catch(() => {
+        console.log("Failed to submit feedback");
+      });
+    // close anyways
+    setIsFeedBackFlowOpen(false);
+  };
+
+  const toggleFeedBackFlow = () => {
+    setIsFeedBackFlowOpen(!isFeedBackFlowOpen);
+  };
+
   return (
     <ReactFlow
       nodes={nodes}
@@ -137,7 +163,15 @@ export default function App() {
       deleteKeyCode={null}
     >
       <Background />
-      <Logo />
+      <Logo toggleFeedBackFlow={toggleFeedBackFlow} />
+      <Panel position="top-center">
+        {isFeedBackFlowOpen && (
+          <FeedBackFlow
+            onSubmit={submitFeedBack}
+            onClose={() => setIsFeedBackFlowOpen(false)}
+          />
+        )}
+      </Panel>
       <RunButton onRun={onRun} />
       <LeftSideBar>
         <NodeSelector

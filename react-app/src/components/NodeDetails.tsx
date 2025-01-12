@@ -33,6 +33,9 @@ export function NodeDetails({
   };
 
   const handleDelete = () => {
+    if (node.id.startsWith("new-")) {
+      onClose(true);
+    }
     deleteQuestion(node.id)
       .then(() => {
         onClose(true);

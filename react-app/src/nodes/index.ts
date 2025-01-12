@@ -20,7 +20,8 @@ const makeAppNodeFromQuestion = (
       answer: question.answer,
       question: question.question,
       parent: question.parent || undefined,
-      func: (question: AppNode) => postQuestion(userId, question),
+      func: (question: AppNode, debug_id?: string | null) =>
+        postQuestion(userId, question, debug_id),
     },
   };
 };

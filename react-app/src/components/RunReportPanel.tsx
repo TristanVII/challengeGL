@@ -25,18 +25,22 @@ export function RunReportPanel({
     setStatus(Status.RUNNING);
     let mediaRecorder: MediaRecorder | null = null;
     let dataUtils: DebugUtils | null = null;
+    let debug_id: string | null = null;
 
     try {
       if (debugNode && debugNode.data.debugUtils) {
+        debug_id = `${debugNode.id}-${Date.now()}`;
         dataUtils = debugNode.data.debugUtils;
+        dataUtils.setDebugId(debug_id);
         mediaRecorder = await dataUtils.startScreenCapture();
         await dataUtils.interceptFetch();
+        // use flowid or smth
       }
 
       for (const node of pending_nodes) {
         if (node.data?.func) {
           try {
-            await node.data.func(node);
+            await node.data.func(node, debug_id);
             setDoneNodes((prev) => [
               ...prev,
               { node, status: Status.COMPLETED },
@@ -54,6 +58,7 @@ export function RunReportPanel({
       if (mediaRecorder && dataUtils) {
         mediaRecorder.stop();
         dataUtils.stopAndSaveTrafficLog();
+        dataUtils.downloadServerLogs(debug_id);
       }
     }
   };
@@ -64,9 +69,9 @@ export function RunReportPanel({
     <div
       className={`fixed top-20 right-4 h-[90vh] w-96 bg-white border border-gray-200 rounded-lg transform transition-transform duration-300 ease-in-out ${
         isOpen ? "translate-x-0" : "translate-x-full"
-      } z-40`}
+      } z-40 flex flex-col`}
     >
-      <div className="flex justify-between items-center p-4 border-b">
+      <div className="flex justify-between items-center p-4 border-b shrink-0">
         <div className="flex items-center gap-2">
           <button
             onClick={() => {
@@ -89,32 +94,34 @@ export function RunReportPanel({
           Execute
         </button>
       </div>
-      <div className="p-4 text-gray-600">
-        <h3 className="text-lg font-bold">Pending Tasks</h3>
-        {(status === Status.PENDING || status === Status.FAILED) && (
-          <div className="flex flex-col gap-2">
-            {pending_nodes.map((node, index) => (
-              <ReportNode
-                node={node}
-                index={index}
-                key={index}
-                status={status}
-              />
-            ))}
-          </div>
-        )}
-        {status !== Status.PENDING && (
-          <div className="flex flex-col gap-2">
-            {doneNodes.map(({ node, status }, index) => (
-              <ReportNode
-                node={node}
-                index={index}
-                key={index}
-                status={status}
-              />
-            ))}
-          </div>
-        )}
+      <div className="p-4 text-gray-600 overflow-hidden flex flex-col flex-grow">
+        <h3 className="text-lg font-bold mb-4 shrink-0">Pending Tasks</h3>
+        <div className="overflow-y-auto flex-grow">
+          {(status === Status.PENDING || status === Status.FAILED) && (
+            <div className="flex flex-col gap-2">
+              {pending_nodes.map((node, index) => (
+                <ReportNode
+                  node={node}
+                  index={index}
+                  key={index}
+                  status={status}
+                />
+              ))}
+            </div>
+          )}
+          {status !== Status.PENDING && (
+            <div className="flex flex-col gap-2">
+              {doneNodes.map(({ node, status }, index) => (
+                <ReportNode
+                  node={node}
+                  index={index}
+                  key={index}
+                  status={status}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
