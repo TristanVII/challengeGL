@@ -19,7 +19,7 @@ import { edgeTypes } from "./edges";
 import { RunButton } from "./components/RunButton";
 import { RunReportPanel } from "./components/RunReportPanel";
 import { Logo } from "./components/Logo";
-import { fetchQuestions } from "./service/fetchQuestions";
+import { fetchQuestions, postQuestion } from "./service/Question";
 import { NodeDetails } from "./components/NodeDetails";
 import { AppNode } from "./nodes/types";
 import { LeftSideBar } from "./components/LeftSideBar";
@@ -38,7 +38,7 @@ export default function App() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [userId, setUserId] = useState("");
   const [selectedNode, setSelectedNode] = useState<AppNode | null>(null);
-
+  const [pending_nodes, setPendingNodes] = useState<AppNode[]>([]);
   useEffect(() => {
     async function fetchInitNodes() {
       const fpPromise = FingerprintJS.load();
@@ -46,43 +46,12 @@ export default function App() {
       const id = (await fp.get()).visitorId;
       setUserId(id);
       const questions = await fetchQuestions(userId);
-      const { appNodes, edges } = formatQuestionsToNode(questions);
+      const { appNodes, edges } = formatQuestionsToNode(questions, userId);
       setNodes(appNodes);
       setEdges(edges);
     }
     fetchInitNodes();
   }, [userId]);
-
-  // const onConnect: OnConnect = useCallback(
-  //   (connection) => {
-  //     const { source, target } = connection;
-  //     const map = stagedNodesRef.current;
-
-  //     // If both nodes are staged, prevent connection
-  //     if (map.has(source) && map.has(target)) {
-  //       return;
-  //     }
-
-  //     // If connecting a staged node to a non-staged node
-  //     if (map.has(source)) {
-  //       const stagedNode = map.get(source)!;
-  //       setNodes((nodes) => [
-  //         ...nodes,
-  //         { ...stagedNode, data: { ...stagedNode.data, parent: target } },
-  //       ]);
-  //     } else if (map.has(target)) {
-  //       const stagedNode = map.get(target)!;
-  //       setNodes((nodes) => [
-  //         ...nodes,
-  //         { ...stagedNode, data: { ...stagedNode.data, parent: source } },
-  //       ]);
-  //     }
-
-  //     // Add the edge
-  //     setEdges((edges) => addEdge(connection, edges));
-  //   },
-  //   [setEdges, setNodes]
-  // );
 
   const onNodeClick = (_: React.MouseEvent, node: Node) => {
     setSelectedNode(node as AppNode);
@@ -99,16 +68,39 @@ export default function App() {
   const addNewNode = () => {
     const newNode: AppNode = {
       id: `new-${Math.random().toString(36).substring(2, 15)}`,
+      type: "question-node",
       position: { x: Math.random() * 500, y: Math.random() * 500 },
       data: {
         label: "New Question",
         question: "New Question",
         answer: "",
+        func: (node) => postQuestion(userId, node),
       },
     };
     console.log(newNode);
-    // stagedNodesRef.current.set(newNode.id, newNode);
     setNodes((nodes) => [...nodes, newNode]);
+  };
+
+  const handleAskQuestion = (node: AppNode, question: string) => {
+    const newNodes = nodes.map((n) =>
+      n.id === node.id
+        ? { ...n, data: { ...n.data, pending_question: question } }
+        : n
+    );
+    setNodes(newNodes);
+    console.log(nodes);
+    setPendingNodes([...newNodes.filter((n) => n.data.pending_question)]);
+  };
+
+  const handleRemoveQuestion = (node: AppNode) => {
+    setNodes((nodes) =>
+      nodes.map((n) =>
+        n.id === node.id
+          ? { ...n, data: { ...n.data, pending_question: "" } }
+          : n
+      )
+    );
+    setPendingNodes((nodes) => nodes.filter((n) => n.id !== node.id));
   };
 
   return (
@@ -133,11 +125,19 @@ export default function App() {
       <RunReportPanel
         isOpen={isPanelOpen}
         onClose={() => setIsPanelOpen(false)}
+        pending_nodes={pending_nodes}
       />
       {selectedNode && (
         <NodeDetails
           node={selectedNode}
-          onClose={() => setSelectedNode(null)}
+          onClose={(reload) => {
+            setSelectedNode(null);
+            if (reload) {
+              window.location.reload();
+            }
+          }}
+          onAskQuestion={handleAskQuestion}
+          onRemoveQuestion={handleRemoveQuestion}
         />
       )}
     </ReactFlow>

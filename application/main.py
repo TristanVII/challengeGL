@@ -49,7 +49,16 @@ async def post_question(question: Question):
     answer = open_AI_service.ask_question(question.question, question.question_parent_id, '')
 
     question_bank = collections['question_bank']
-    node_id = question_bank.push({'question': question.question, 'answer': answer, 'parent': question.question_parent_id })
+
+    obj = {
+        'question': question.question,
+        'answer': answer
+    }
+    # new- is way for front-end to create a new node
+    if hasattr(question, 'question_parent_id') and question.question_parent_id and not question.question_parent_id.startswith('new-'):
+        obj['parent'] = question.question_parent_id
+
+    node_id = question_bank.push(obj)
     res = {
         'question': question.question,
         'answer': answer,

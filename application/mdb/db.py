@@ -1,3 +1,4 @@
+from collections import deque
 from bson.objectid import ObjectId
 import pymongo
 from abc import ABC, abstractmethod
@@ -24,6 +25,19 @@ class MdbCollection(ABC):
 
     # TODO: DELETE NEEDS TO ALSO DELETE ALL CHILDREN
     def delete_from_id(self, id):
+        all_children = []
+        node = self.get_from_id(id)
+        q = deque([node])
+        while q:
+            child = q.popleft()
+            if child and hasattr(child, 'children'):
+                for x in child['childre']:
+                    q.append(self.get_from_id(x))
+                    all_children.append(x)
+
+        for child in all_children:
+            print(f"deleting child {child}")
+            self.collection.delete_one({'_id': ObjectId(child)})
         deleted =  self.collection.delete_one({'_id': ObjectId(id)})
         return deleted.acknowledged
 
@@ -38,6 +52,8 @@ class QuestionBank(MdbCollection):
     def push(self, obj):
         result = self.collection.insert_one(obj)
         result_id = result.inserted_id
+        if result_id and hasattr(obj, 'parent'):
+            self._push_child(obj['parent'], result_id)
         return result_id
 
 

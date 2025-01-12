@@ -1,18 +1,25 @@
 import type { Edge, NodeTypes } from "@xyflow/react";
 
 import { AppNode } from "./types";
-import { Question } from "../service/fetchQuestions";
+import { postQuestion, Question } from "../service/Question";
+import QuestionNodeComponent from "./QuestionNode";
 
 export const initialNodes: AppNode[] = [];
 
-const makeAppNodeFromQuestion = (question: Question): AppNode => {
+const makeAppNodeFromQuestion = (
+  question: Question,
+  userId: string
+): AppNode => {
   return {
     id: question._id,
+    type: "question-node",
     position: { x: Math.random() * 500, y: Math.random() * 500 },
     data: {
       label: question.question,
       answer: question.answer,
       question: question.question,
+      parent: question.parent || undefined,
+      func: (question: AppNode) => postQuestion(userId, question),
     },
   };
 };
@@ -26,7 +33,10 @@ const makeEdgeFromQuestion = (question: Question): Edge => {
   };
 };
 
-export function formatQuestionsToNode(questions: Question[]): {
+export function formatQuestionsToNode(
+  questions: Question[],
+  userId: string
+): {
   appNodes: AppNode[];
   edges: Edge[];
 } {
@@ -34,7 +44,7 @@ export function formatQuestionsToNode(questions: Question[]): {
   const edges: Edge[] = [];
 
   questions.forEach((question) => {
-    appNodes.push(makeAppNodeFromQuestion(question));
+    appNodes.push(makeAppNodeFromQuestion(question, userId));
     if (question.parent) {
       edges.push(makeEdgeFromQuestion(question));
     }
@@ -44,5 +54,5 @@ export function formatQuestionsToNode(questions: Question[]): {
 }
 
 export const nodeTypes = {
-  // Add any of your custom nodes here!
+  "question-node": QuestionNodeComponent,
 } satisfies NodeTypes;

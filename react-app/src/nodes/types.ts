@@ -6,7 +6,9 @@ export type QuestionNode = Node<
     answer: string;
     label: string;
     parent?: string;
+    pending_question?: string;
+    func?: (question: QuestionNode) => Promise<Response>;
   },
-  "function-node"
+  "question-node"
 >;
 export type AppNode = QuestionNode;
