@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   ReactFlow,
   Background,
-  addEdge,
   useNodesState,
   useEdgesState,
-  type OnConnect,
   Node,
 } from "@xyflow/react";
 
@@ -21,9 +19,10 @@ import { RunReportPanel } from "./components/RunReportPanel";
 import { Logo } from "./components/Logo";
 import { fetchQuestions, postQuestion } from "./service/Question";
 import { NodeDetails } from "./components/NodeDetails";
-import { AppNode } from "./nodes/types";
+import { AppNode, DebugNode } from "./nodes/types";
 import { LeftSideBar } from "./components/LeftSideBar";
 import { NodeSelector } from "./components/NodeSelector";
+import { DebugUtils } from "./utils/debugUtils";
 
 const initialEdges = [
   { id: "e1-2", source: "a", target: "c" },
@@ -39,6 +38,7 @@ export default function App() {
   const [userId, setUserId] = useState("");
   const [selectedNode, setSelectedNode] = useState<AppNode | null>(null);
   const [pending_nodes, setPendingNodes] = useState<AppNode[]>([]);
+  const [debugNode, setDebugNode] = useState<DebugNode | null>(null);
   useEffect(() => {
     async function fetchInitNodes() {
       const fpPromise = FingerprintJS.load();
@@ -58,7 +58,6 @@ export default function App() {
   };
 
   const onRun = () => {
-    console.log("Running flow...");
     console.log(nodes);
     const nodesToRun = nodes.filter((node) => node.data.answer === "");
     console.log(nodesToRun);
@@ -79,6 +78,27 @@ export default function App() {
     };
     console.log(newNode);
     setNodes((nodes) => [...nodes, newNode]);
+  };
+
+  const addDebugNode = () => {
+    const newNode: DebugNode = {
+      id: `debug-${Math.random().toString(36).substring(2, 15)}`,
+      type: "debug-node",
+      position: { x: Math.random() * 500, y: Math.random() * 500 },
+      data: {
+        label: "Debug Node",
+        func: () => {},
+        debugUtils: new DebugUtils(),
+      },
+    };
+    // TODO: hack for now
+    setNodes((nodes) => [...nodes, newNode as AppNode]);
+    setDebugNode(newNode);
+  };
+
+  const removeDebugNode = () => {
+    setNodes((nodes) => nodes.filter((n) => n.id !== debugNode?.id));
+    setDebugNode(null);
   };
 
   const handleAskQuestion = (node: AppNode, question: string) => {
@@ -120,12 +140,18 @@ export default function App() {
       <Logo />
       <RunButton onRun={onRun} />
       <LeftSideBar>
-        <NodeSelector addNode={addNewNode} />
+        <NodeSelector
+          addNode={addNewNode}
+          addDebugNode={addDebugNode}
+          debugNode={debugNode}
+          removeDebugNode={removeDebugNode}
+        />
       </LeftSideBar>
       <RunReportPanel
         isOpen={isPanelOpen}
         onClose={() => setIsPanelOpen(false)}
         pending_nodes={pending_nodes}
+        debugNode={debugNode}
       />
       {selectedNode && (
         <NodeDetails

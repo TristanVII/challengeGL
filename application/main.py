@@ -56,6 +56,7 @@ async def post_question(question: Question):
     }
     # new- is way for front-end to create a new node
     if hasattr(question, 'question_parent_id') and question.question_parent_id and not question.question_parent_id.startswith('new-'):
+        print(obj)
         obj['parent'] = question.question_parent_id
 
     node_id = question_bank.push(obj)

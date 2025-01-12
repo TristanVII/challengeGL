@@ -1,4 +1,5 @@
 import type { Node } from "@xyflow/react";
+import { DebugUtils } from "../utils/debugUtils";
 
 export type QuestionNode = Node<
   {
@@ -10,5 +11,13 @@ export type QuestionNode = Node<
     func?: (question: QuestionNode) => Promise<Response>;
   },
   "question-node"
+>;
+export type DebugNode = Node<
+  {
+    label: string;
+    func?: () => void;
+    debugUtils?: DebugUtils;
+  },
+  "debug-node"
 >;
 export type AppNode = QuestionNode;

@@ -7,6 +7,13 @@ export type Question = {
   parent?: string | null;
 };
 
+export enum Status {
+  PENDING = "pending",
+  RUNNING = "running",
+  COMPLETED = "completed",
+  FAILED = "failed",
+}
+
 // TODO NO SERVER SIDE AUTH ATM
 const API_URL = "http://127.0.0.1:8000";
 

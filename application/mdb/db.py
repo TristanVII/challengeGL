@@ -27,11 +27,12 @@ class MdbCollection(ABC):
     def delete_from_id(self, id):
         all_children = []
         node = self.get_from_id(id)
+        print("DELETING NODE", node)
         q = deque([node])
         while q:
             child = q.popleft()
-            if child and hasattr(child, 'children'):
-                for x in child['childre']:
+            if child and 'children' in child:
+                for x in child['children']:
                     q.append(self.get_from_id(x))
                     all_children.append(x)
 
@@ -52,15 +53,18 @@ class QuestionBank(MdbCollection):
     def push(self, obj):
         result = self.collection.insert_one(obj)
         result_id = result.inserted_id
-        if result_id and hasattr(obj, 'parent'):
-            self._push_child(obj['parent'], result_id)
+        if result_id:
+            try:
+                self._push_child(obj['parent'], result_id)
+            except Exception as e:
+                print("ERROR PUSHING CHILD", e)
         return result_id
 
 
 
     def _push_child(self,id, child):
         result = self.collection.update_one(
-            {"_id": id},
+            {"_id": ObjectId(id)},
             {"$push": {"children": child}}
         )
         if result.modified_count > 0:

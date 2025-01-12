@@ -8,12 +8,17 @@ class OpenAIService:
         self.question_bank = question_bank
 
     def ask_question(self, query, parent_id, api_key=None, model="gpt-3.5-turbo", max_tokens=150):
-        key = api_key if api_key else self.api_key
-        if not key:
-            raise Exception('API key required')
-        openai.api_key = key
-        message = self.get_message_history(parent_id)
-        message.append({"role": "user", "content": query})
+        try:
+            key = api_key if api_key else self.api_key
+            if not key:
+                raise Exception('API key required')
+            openai.api_key = key
+            message = []
+            if not parent_id.startswith('new-'):
+                message = self.get_message_history(parent_id)
+            message.append({"role": "user", "content": query})
+        except Exception as e:
+            return "ERRO"
 
         #####
         #DEBUG
@@ -40,7 +45,10 @@ class OpenAIService:
             if parent:
                 q.appendleft({"role": "user", "content": parent['answer']})
                 q.appendleft({"role": "assistant", "content": parent['question']})
-                p_id = parent['parent']
+                if hasattr(parent, 'parent') and parent['parent']:
+                    p_id = parent['parent']
+                else:
+                    p_id = None
             else:
                 p_id = None
 

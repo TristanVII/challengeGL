@@ -3,6 +3,7 @@ import type { Edge, NodeTypes } from "@xyflow/react";
 import { AppNode } from "./types";
 import { postQuestion, Question } from "../service/Question";
 import QuestionNodeComponent from "./QuestionNode";
+import DebugNodeComponent from "./DebugNode";
 
 export const initialNodes: AppNode[] = [];
 
@@ -55,4 +56,5 @@ export function formatQuestionsToNode(
 
 export const nodeTypes = {
   "question-node": QuestionNodeComponent,
+  "debug-node": DebugNodeComponent,
 } satisfies NodeTypes;

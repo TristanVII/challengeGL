@@ -1,22 +1,64 @@
 import { useState } from "react";
-import { QuestionNode } from "../nodes/types";
+import { DebugNode, QuestionNode } from "../nodes/types";
 import ReportNode from "./ReportNode";
+import { Status } from "../service/Question";
+import { DebugUtils } from "../utils/debugUtils";
 
 interface RunReportPanelProps {
   isOpen: boolean;
   onClose: () => void;
   pending_nodes: QuestionNode[];
+  debugNode: DebugNode | null;
 }
 
 export function RunReportPanel({
   isOpen,
   onClose,
   pending_nodes,
+  debugNode,
 }: RunReportPanelProps) {
-  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [status, setStatus] = useState<Status>(Status.PENDING);
+  const [doneNodes, setDoneNodes] = useState<
+    { node: QuestionNode; status: Status }[]
+  >([]);
   const onRun = async () => {
-    setIsRunning(true);
+    setStatus(Status.RUNNING);
+    let mediaRecorder: MediaRecorder | null = null;
+    let dataUtils: DebugUtils | null = null;
+
+    try {
+      if (debugNode && debugNode.data.debugUtils) {
+        dataUtils = debugNode.data.debugUtils;
+        mediaRecorder = await dataUtils.startScreenCapture();
+        await dataUtils.interceptFetch();
+      }
+
+      for (const node of pending_nodes) {
+        if (node.data?.func) {
+          try {
+            await node.data.func(node);
+            setDoneNodes((prev) => [
+              ...prev,
+              { node, status: Status.COMPLETED },
+            ]);
+          } catch (error) {
+            setDoneNodes((prev) => [...prev, { node, status: Status.FAILED }]);
+          }
+        }
+      }
+    } catch (error) {
+      setStatus(Status.FAILED);
+      console.error("Error in onRun:", error);
+    } finally {
+      setStatus(Status.COMPLETED);
+      if (mediaRecorder && dataUtils) {
+        mediaRecorder.stop();
+        dataUtils.stopAndSaveTrafficLog();
+      }
+    }
   };
+
+  console.log(status);
 
   return (
     <div
@@ -28,8 +70,11 @@ export function RunReportPanel({
         <div className="flex items-center gap-2">
           <button
             onClick={() => {
-              setIsRunning(false);
+              if (status === Status.COMPLETED) {
+                window.location.reload();
+              }
               onClose();
+              setStatus(Status.PENDING);
             }}
             className="text-gray-500 hover:text-gray-700 p-1"
           >
@@ -46,16 +91,30 @@ export function RunReportPanel({
       </div>
       <div className="p-4 text-gray-600">
         <h3 className="text-lg font-bold">Pending Tasks</h3>
-        <div className="flex flex-col gap-2">
-          {pending_nodes.map((node, index) => (
-            <ReportNode
-              node={node}
-              index={index}
-              key={index}
-              isRunning={isRunning}
-            />
-          ))}
-        </div>
+        {(status === Status.PENDING || status === Status.FAILED) && (
+          <div className="flex flex-col gap-2">
+            {pending_nodes.map((node, index) => (
+              <ReportNode
+                node={node}
+                index={index}
+                key={index}
+                status={status}
+              />
+            ))}
+          </div>
+        )}
+        {status !== Status.PENDING && (
+          <div className="flex flex-col gap-2">
+            {doneNodes.map(({ node, status }, index) => (
+              <ReportNode
+                node={node}
+                index={index}
+                key={index}
+                status={status}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

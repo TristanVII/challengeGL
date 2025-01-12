@@ -4,7 +4,6 @@ interface RunButtonProps {
 
 export function RunButton({ onRun }: RunButtonProps) {
   const runFlow = () => {
-    console.log("Running flow...");
     onRun();
   };
 
