@@ -10,7 +10,6 @@ export default function ReportNode({
   index: number;
   status: Status;
 }) {
-  console.log("NODE");
   return (
     <div
       key={index}

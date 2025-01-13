@@ -44,8 +44,6 @@ export async function postQuestion(
     debug_id: debug_id,
   };
 
-  console.log(body);
-
   const request = new Request(`${API_URL}/question`, {
     method: "POST",
     headers: {

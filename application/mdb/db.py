@@ -5,17 +5,6 @@ from abc import ABC, abstractmethod
 
 from pymongo.synchronous.collection import Collection
 
-# client = pymongo.MongoClient("mongodb://localhost:27017/")
-# client = pymongo.MongoClient("mongodb+srv://<username>:<password>@cluster0.mongodb.net/test?retryWrites=true&w=majority")
-
- # {
- #    _id: ObjectId('677796c3efa93568bb4ac408'),
- #    question: '2The question is...',
- #    answer: '2The answer is...',
- #    children: [],
- #    parent: ''
- #  }
-
 class MdbCollection(ABC):
     def __init__(self, collection: Collection):
         self.collection = collection
@@ -23,7 +12,6 @@ class MdbCollection(ABC):
     def get_from_id(self, id):
         return self.collection.find_one({'_id': ObjectId(id)})
 
-    # TODO: DELETE NEEDS TO ALSO DELETE ALL CHILDREN
     def delete_from_id(self, id):
         all_children = []
         node = self.get_from_id(id)

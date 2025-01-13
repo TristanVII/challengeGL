@@ -1,4 +1,4 @@
-
+# NOT USED ANYMORE
 class Node:
     def __init__(self, val, parent, id) -> None:
         if not id:

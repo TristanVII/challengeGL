@@ -62,9 +62,6 @@ export default function App() {
   };
 
   const onRun = () => {
-    console.log(nodes);
-    const nodesToRun = nodes.filter((node) => node.data.answer === "");
-    console.log(nodesToRun);
     setIsPanelOpen(true);
   };
 
@@ -80,7 +77,6 @@ export default function App() {
         func: (node, debug_id) => postQuestion(userId, node, debug_id),
       },
     };
-    console.log(newNode);
     setNodes((nodes) => [...nodes, newNode]);
   };
 
@@ -112,7 +108,6 @@ export default function App() {
         : n
     );
     setNodes(newNodes);
-    console.log(nodes);
     setPendingNodes([...newNodes.filter((n) => n.data.pending_question)]);
   };
 
@@ -133,7 +128,6 @@ export default function App() {
     question2: string;
     question3: string;
   }) => {
-    console.log(feedback);
     postFeedBack(feedback, userId)
       .then(() => {
         console.log("Feedback submitted");

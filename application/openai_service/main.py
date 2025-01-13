@@ -1,11 +1,13 @@
 import openai
 from mdb.db import QuestionBank, FeedbackBank
 from collections import deque
+import os
 
 # TODO: Make children classes that extends OpenAIService, with each own collection
 class OpenAIService:
     def __init__(self, question_bank: QuestionBank, feedback_bank: FeedbackBank, api_key=None):
-        self.api_key = api_key or ''
+        # TODO: ADD UR API KEY
+        self.api_key = api_key or os.getenv('OPENAI_API_KEY')
         self.question_bank = question_bank
         self.feedback_bank = feedback_bank
 
@@ -22,12 +24,6 @@ class OpenAIService:
         except Exception as e:
             return "ERROR"
 
-        #####
-        #DEBUG
-        #####
-        print("Asking question with message:\n")
-        for msg in message:
-            print(f'{msg}\n')
         try:
             response = openai.chat.completions.create(
                 model=model,

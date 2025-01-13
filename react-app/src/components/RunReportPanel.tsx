@@ -63,8 +63,6 @@ export function RunReportPanel({
     }
   };
 
-  console.log(status);
-
   return (
     <div
       className={`fixed top-20 right-4 h-[90vh] w-96 bg-white border border-gray-200 rounded-lg transform transition-transform duration-300 ease-in-out ${
@@ -95,8 +93,18 @@ export function RunReportPanel({
         </button>
       </div>
       <div className="p-4 text-gray-600 overflow-hidden flex flex-col flex-grow">
-        <h3 className="text-lg font-bold mb-4 shrink-0">Pending Tasks</h3>
+        <h3 className="text-lg font-bold mb-4 shrink-0">
+          {status === Status.RUNNING ? "Processing Tasks..." : "Pending Tasks"}
+        </h3>
         <div className="overflow-y-auto flex-grow">
+          {status === Status.RUNNING && (
+            <div className="flex flex-col items-center justify-center py-8 space-y-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500"></div>
+              <p className="text-gray-600 animate-pulse">
+                Executing {doneNodes.length} of {pending_nodes.length} tasks...
+              </p>
+            </div>
+          )}
           {(status === Status.PENDING || status === Status.FAILED) && (
             <div className="flex flex-col gap-2">
               {pending_nodes.map((node, index) => (
@@ -109,7 +117,7 @@ export function RunReportPanel({
               ))}
             </div>
           )}
-          {status !== Status.PENDING && (
+          {status !== Status.PENDING && status !== Status.RUNNING && (
             <div className="flex flex-col gap-2">
               {doneNodes.map(({ node, status }, index) => (
                 <ReportNode
