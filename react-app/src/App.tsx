@@ -8,6 +8,9 @@ import {
   Panel,
 } from "@xyflow/react";
 
+// https://www.npmjs.com/package/@fingerprintjs/fingerprintjs
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
+
 import "@xyflow/react/dist/style.css";
 
 import { formatQuestionsToNode, nodeTypes } from "./nodes";
@@ -23,10 +26,6 @@ import { NodeSelector } from "./components/NodeSelector";
 import { DebugUtils } from "./utils/debugUtils";
 import FeedBackFlow from "./components/FeedBackFlow";
 import { postFeedBack } from "./service/FeedBack";
-import {
-  checkLocalStorageKey,
-  setLocalStorageKeyValue,
-} from "./utils/localStorage";
 
 const initialEdges = [
   { id: "e1-2", source: "a", target: "c" },
@@ -46,13 +45,9 @@ export default function App() {
   const [isFeedBackFlowOpen, setIsFeedBackFlowOpen] = useState(false);
   useEffect(() => {
     async function fetchInitNodes() {
-      const id = checkLocalStorageKey("gumloop-userId");
-      if (!id) {
-        setLocalStorageKeyValue(
-          "gumloop-userId",
-          Math.random().toString(36).substring(2, 15)
-        );
-      }
+      const fpPromise = FingerprintJS.load();
+      const fp = await fpPromise;
+      const id = (await fp.get()).visitorId;
       setUserId(id);
       const questions = await fetchQuestions(userId);
       const { appNodes, edges } = formatQuestionsToNode(questions, userId);
