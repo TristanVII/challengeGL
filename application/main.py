@@ -98,17 +98,19 @@ async def delete_question(id: int | str):
     return  200 if deleted else 404
 
 
+# deprecated - using gumloop webhook for now
 @app.post("/feedback")
 async def post_feedback(feedback: Feedback):
-    feedback_bank = collections['feedback_bank']
-
-    open_AI_service = OpenAIService(None, collections['question_bank'])
-    answer = open_AI_service.validate_feedback(feedback)
-    if answer.strip() == '1' or answer == 1:
-        feedback_bank.push(feedback.model_dump())
-        return 200
-    else:
-        return {"message": "Feedback is not helpful or has no value"}
+    return 404
+    # feedback_bank = collections['feedback_bank']
+    #
+    # open_AI_service = OpenAIService(None, collections['question_bank'])
+    # answer = open_AI_service.validate_feedback(feedback)
+    # if answer.strip() == '1' or answer == 1:
+    #     feedback_bank.push(feedback.model_dump())
+    #     return 200
+    # else:
+    #     return {"message": "Feedback is not helpful or has no value"}
 
 
 @app.get("/debug/{id}")
