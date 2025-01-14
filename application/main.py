@@ -40,7 +40,7 @@ async def root():
 @app.get("/questions")
 async def get_all_questions(id: str):
     question_bank = collections['question_bank']
-    q = question_bank.get_all()
+    q = question_bank.get_all(id)
     for question in q:
         question['_id'] = str(question['_id'])
     return json_util.dumps(q)
@@ -76,6 +76,7 @@ async def post_question(question: Question):
         logger.info(f"RESPONSE: Updated MongoDB for {json_util.dumps(obj)} for debug_id: {debug_id}")
 
     res = {
+        'user_id': question.user_id,
         'question': question.question,
         'answer': answer,
         'parent_id': question.question_parent_id,

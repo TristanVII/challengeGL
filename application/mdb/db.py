@@ -30,8 +30,8 @@ class MdbCollection(ABC):
         deleted =  self.collection.delete_one({'_id': ObjectId(id)})
         return deleted.acknowledged
 
-    def get_all(self):
-        return list(self.collection.find())
+    def get_all(self, user_id):
+        return list(self.collection.find({'user_id': user_id}))
 
 
 class QuestionBank(MdbCollection):
