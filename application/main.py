@@ -64,6 +64,7 @@ async def post_question(question: Question):
     question_bank = collections['question_bank']
 
     obj = {
+        'user_id': question.user_id,
         'question': question.question,
         'answer': answer
     }
