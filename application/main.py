@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from mdb.db import MongoDB
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Union
 from bson import json_util
 from db_models.model import Question, Feedback
 from openai_service.main import OpenAIService
@@ -16,7 +17,7 @@ LOG_FILE = "/tmp/gum-logs/logs.log"
 collections = {}
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    mdb = MongoDB("mongodb://localhost:27017/")
+    mdb = MongoDB(os.getenv('MONGODB_URI'))
     collections['question_bank'] = mdb.get_question_bank()
     collections['feedback_bank'] = mdb.get_feedback_bank()
     yield
@@ -24,17 +25,12 @@ async def lifespan(app: FastAPI):
 
 app= FastAPI(lifespan=lifespan)
 
-origins = [
-   "http://localhost",
-    "http://localhost:5173",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Allows all origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
 
 @app.get("/")
@@ -92,7 +88,7 @@ async def post_question(question: Question):
 
 
 @app.delete("/question/{id}", status_code=200)
-async def delete_question(id: int | str):
+async def delete_question(id: Union[int, str]):
     question_bank = collections['question_bank']
     deleted = question_bank.delete_from_id(str(id))
     return  200 if deleted else 404

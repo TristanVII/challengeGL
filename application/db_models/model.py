@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class Question(BaseModel):
@@ -7,7 +8,7 @@ class Question(BaseModel):
     question_parent_id: str
     model: str
     key: str
-    debug_id: str | None
+    debug_id: Optional[str] = None
 
 class Feedback(BaseModel):
     user_id: str
