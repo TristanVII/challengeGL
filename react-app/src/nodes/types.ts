@@ -8,6 +8,7 @@ export type QuestionNode = Node<
     label: string;
     parent?: string;
     pending_question?: string;
+    isRoot?: boolean;
     func?: (
       question: QuestionNode,
       debug_id?: string | null

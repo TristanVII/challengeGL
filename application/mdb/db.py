@@ -39,14 +39,18 @@ class QuestionBank(MdbCollection):
         super().__init__(collection)
 
     def push(self, obj):
-        result = self.collection.insert_one(obj)
-        result_id = result.inserted_id
-        if result_id:
-            try:
-                self._push_child(obj['parent'], result_id)
-            except Exception as e:
-                print("ERROR PUSHING CHILD", e)
-        return result_id
+        try:
+            result = self.collection.insert_one(obj)
+            result_id = result.inserted_id
+            if result_id and obj['parent_id']:
+                try:
+                    self._push_child(obj['parent_id'], result_id)
+                except Exception as e:
+                        print("ERROR PUSHING CHILD", e)
+                return result_id
+        except Exception as e:
+            print("ERROR PUSHING QUESTION", e)
+            return None
 
 
 
@@ -66,7 +70,6 @@ class FeedbackBank(MdbCollection):
         super().__init__(collection)
 
     def push(self, obj):
-        print("PUSHING FEEDBACK", obj)
         result = self.collection.insert_one(obj)
         return result.inserted_id
 

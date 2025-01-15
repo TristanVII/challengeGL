@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -6,10 +7,8 @@ import {
   useEdgesState,
   Node,
   Panel,
+  addEdge,
 } from "@xyflow/react";
-
-// https://www.npmjs.com/package/@fingerprintjs/fingerprintjs
-import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 import "@xyflow/react/dist/style.css";
 
@@ -18,7 +17,11 @@ import { edgeTypes } from "./edges";
 import { RunButton } from "./components/RunButton";
 import { RunReportPanel } from "./components/RunReportPanel";
 import { Logo } from "./components/Logo";
-import { fetchQuestions, postQuestion } from "./service/Question";
+import {
+  fetchQuestions,
+  mongodbObjectId,
+  postQuestion,
+} from "./service/Question";
 import { NodeDetails } from "./components/NodeDetails";
 import { AppNode, DebugNode } from "./nodes/types";
 import { LeftSideBar } from "./components/LeftSideBar";
@@ -26,6 +29,10 @@ import { NodeSelector } from "./components/NodeSelector";
 import { DebugUtils } from "./utils/debugUtils";
 import FeedBackFlow from "./components/FeedBackFlow";
 import { postFeedBack } from "./service/FeedBack";
+import {
+  checkLocalStorageKey,
+  setLocalStorageKeyValue,
+} from "./utils/localStorage";
 
 const initialEdges = [
   { id: "e1-2", source: "a", target: "c" },
@@ -45,9 +52,13 @@ export default function App() {
   const [isFeedBackFlowOpen, setIsFeedBackFlowOpen] = useState(false);
   useEffect(() => {
     async function fetchInitNodes() {
-      const fpPromise = FingerprintJS.load();
-      const fp = await fpPromise;
-      const id = (await fp.get()).visitorId;
+      const id = checkLocalStorageKey("gumloop-userId");
+      if (!id) {
+        setLocalStorageKeyValue(
+          "gumloop-userId",
+          Math.random().toString(36).substring(2, 15)
+        );
+      }
       setUserId(id);
       const questions = await fetchQuestions(userId);
       const { appNodes, edges } = formatQuestionsToNode(questions, userId);
@@ -67,10 +78,11 @@ export default function App() {
 
   const addNewNode = () => {
     const newNode: AppNode = {
-      id: `new-${Math.random().toString(36).substring(2, 15)}`,
+      id: mongodbObjectId(),
       type: "question-node",
       position: { x: Math.random() * 500, y: Math.random() * 500 },
       data: {
+        parent: undefined,
         label: "New Question",
         question: "New Question",
         answer: "",
@@ -143,6 +155,48 @@ export default function App() {
     setIsFeedBackFlowOpen(!isFeedBackFlowOpen);
   };
 
+  const onConnect = useCallback(
+    (params: any) => {
+      const targetHasParent = edges.some(
+        (edge) => edge.target === params.target
+      );
+      // Prevent connection if target already has a parent
+      if (targetHasParent) {
+        return;
+      }
+
+      // top node / parent
+      const sourceNode = nodes.find((node) => node.id === params.source);
+      // bottom node / child
+      const targetNode = nodes.find((node) => node.id === params.target);
+
+      // Prevent connection if both nodes are root nodes
+      if (
+        !sourceNode ||
+        !targetNode ||
+        (sourceNode.data.isRoot && targetNode.data.isRoot)
+      ) {
+        return;
+      }
+      const nodeWithUpdatedParent = {
+        ...targetNode,
+        data: {
+          ...targetNode.data,
+          parent: sourceNode?.id,
+        },
+      };
+
+      setNodes((nodes) =>
+        nodes.map((n) =>
+          n.id === nodeWithUpdatedParent.id ? nodeWithUpdatedParent : n
+        )
+      );
+
+      setEdges((eds) => addEdge({ ...params, animated: true }, eds));
+    },
+    [edges, setEdges, nodes, setNodes]
+  );
+
   return (
     <ReactFlow
       nodes={nodes}
@@ -151,7 +205,7 @@ export default function App() {
       edges={edges}
       edgeTypes={edgeTypes}
       onEdgesChange={onEdgesChange}
-      // onConnect={onConnect}
+      onConnect={onConnect}
       onNodeClick={onNodeClick}
       fitView
       deleteKeyCode={null}
@@ -180,6 +234,8 @@ export default function App() {
         onClose={() => setIsPanelOpen(false)}
         pending_nodes={pending_nodes}
         debugNode={debugNode}
+        nodes={nodes}
+        edges={edges}
       />
       {selectedNode && (
         <NodeDetails

@@ -6,7 +6,7 @@ const QuestionNodeComponent = memo(
   ({ data }: { data: QuestionNode["data"] }) => {
     const style: React.CSSProperties = {
       backgroundColor: data.pending_question ? "#fee2e2" : "#ffffff",
-      border: data.pending_question ? "2px solid #ef4444" : "1px solid #e5e7eb",
+      border: data.pending_question ? "2px solid #E91E63" : "1px solid #e5e7eb",
       borderRadius: "0.5rem",
       padding: "10px",
       minWidth: "150px",
@@ -18,7 +18,7 @@ const QuestionNodeComponent = memo(
     return (
       <div style={style}>
         <Handle type="target" position={Position.Top} />
-        {!data.parent && (
+        {data.isRoot && (
           <div
             style={{
               backgroundColor: "#fdf2f8",

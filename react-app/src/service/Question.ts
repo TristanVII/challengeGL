@@ -4,7 +4,9 @@ export type Question = {
   _id: string;
   question: string;
   answer: string;
-  parent?: string | null;
+  parent_id?: string | null;
+  user_id: string;
+  position: { x: number; y: number };
 };
 
 export enum Status {
@@ -35,10 +37,13 @@ export async function postQuestion(
   question: AppNode,
   debug_id?: string | null
 ) {
+  console.log("question", question);
   const body = {
+    id: question.id,
     user_id: userId,
     question: question.data.pending_question,
-    question_parent_id: question.id,
+    question_parent_id: question.data.parent,
+    position: question.position,
     model: "",
     key: "",
     debug_id: debug_id,
@@ -58,4 +63,18 @@ export async function deleteQuestion(questionId: string) {
     method: "DELETE",
   });
   return fetch(request);
+}
+
+function objectId() {
+  return (
+    hex(Date.now() / 1000) +
+    " ".repeat(16).replace(/./g, () => hex(Math.random() * 16))
+  );
+}
+
+function hex(value: number) {
+  return Math.floor(value).toString(16);
+}
+export function mongodbObjectId() {
+  return objectId();
 }

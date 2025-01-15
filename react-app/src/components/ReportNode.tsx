@@ -21,7 +21,9 @@ export default function ReportNode({
       <div className="mt-4 space-y-3">
         <p className="text-gray-600">
           <span className="font-medium text-gray-700">Previous Question:</span>{" "}
-          {node.data.question}
+          {node.data.question === "New Question"
+            ? node.data.pending_question
+            : node.data.question}
         </p>
         <p className="text-gray-600">
           <span className="font-medium text-gray-700">Pending Question:</span>{" "}

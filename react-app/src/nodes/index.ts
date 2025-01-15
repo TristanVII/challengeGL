@@ -14,12 +14,13 @@ const makeAppNodeFromQuestion = (
   return {
     id: question._id,
     type: "question-node",
-    position: { x: Math.random() * 500, y: Math.random() * 500 },
+    position: question.position,
     data: {
       label: question.question,
       answer: question.answer,
+      isRoot: question.parent_id === null,
       question: question.question,
-      parent: question.parent || undefined,
+      parent: question.parent_id || undefined,
       func: (question: AppNode, debug_id?: string | null) =>
         postQuestion(userId, question, debug_id),
     },
@@ -29,7 +30,7 @@ const makeAppNodeFromQuestion = (
 const makeEdgeFromQuestion = (question: Question): Edge => {
   return {
     id: question._id,
-    source: question?.parent || "",
+    source: question?.parent_id || "",
     target: question._id,
     animated: true,
   };
@@ -47,7 +48,7 @@ export function formatQuestionsToNode(
 
   questions.forEach((question) => {
     appNodes.push(makeAppNodeFromQuestion(question, userId));
-    if (question.parent) {
+    if (question.parent_id) {
       edges.push(makeEdgeFromQuestion(question));
     }
   });

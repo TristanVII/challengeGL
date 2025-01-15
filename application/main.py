@@ -9,6 +9,7 @@ from openai_service.main import OpenAIService
 from logger.log import load_log_conf
 import os
 import re
+from bson.objectid import ObjectId
 import time
 
 logger = load_log_conf('./log_conf.yml')
@@ -55,22 +56,22 @@ async def post_question(question: Question):
         logger.info(f"REQUEST: /question Received for debug_id: {debug_id}")
 
     open_AI_service = OpenAIService(collections['question_bank'], None, None)
-    answer = open_AI_service.ask_question(question.question, question.question_parent_id)
-    # answer = "test"
-    # time.sleep(5)
+    # answer = open_AI_service.ask_question(question.question, question.question_parent_id)
+    answer = "test"
+    time.sleep(5)
     if debug_id:
         logger.info(f"RESPONSE: OpenAI Received {json_util.dumps(answer)} for debug_id: {debug_id}")
 
     question_bank = collections['question_bank']
 
     obj = {
+        '_id': ObjectId(question.id),
         'user_id': question.user_id,
         'question': question.question,
-        'answer': answer
+        'answer': answer,
+        'position': question.position,
+        'parent_id': question.question_parent_id
     }
-    # new- is way for front-end to create a new node
-    if question.question_parent_id and not question.question_parent_id.startswith('new-'):
-        obj['parent'] = question.question_parent_id
 
     node_id = question_bank.push(obj)
     if debug_id:

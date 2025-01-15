@@ -18,7 +18,7 @@ class OpenAIService:
                 raise Exception('API key required')
             openai.api_key = key
             message = []
-            if not parent_id.startswith('new-'):
+            if parent_id:
                 message = self.get_message_history(parent_id)
             message.append({"role": "user", "content": query})
         except Exception as e:

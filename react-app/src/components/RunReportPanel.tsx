@@ -1,14 +1,18 @@
-import { useState } from "react";
-import { DebugNode, QuestionNode } from "../nodes/types";
+import { useEffect, useState } from "react";
+import { AppNode, DebugNode, QuestionNode } from "../nodes/types";
 import ReportNode from "./ReportNode";
 import { Status } from "../service/Question";
 import { DebugUtils } from "../utils/debugUtils";
+import { Edge } from "@xyflow/react";
+import { getExecutionOrder, topologicalSort } from "../utils/topologicalSort";
 
 interface RunReportPanelProps {
   isOpen: boolean;
   onClose: () => void;
   pending_nodes: QuestionNode[];
   debugNode: DebugNode | null;
+  nodes: AppNode[];
+  edges: Edge[];
 }
 
 export function RunReportPanel({
@@ -16,11 +20,16 @@ export function RunReportPanel({
   onClose,
   pending_nodes,
   debugNode,
+  nodes,
+  edges,
 }: RunReportPanelProps) {
   const [status, setStatus] = useState<Status>(Status.PENDING);
   const [doneNodes, setDoneNodes] = useState<
     { node: QuestionNode; status: Status }[]
   >([]);
+  // EXECUTION ORDER IS GOOD NOW SAVE
+  console.log(getExecutionOrder(nodes));
+
   const onRun = async () => {
     setStatus(Status.RUNNING);
     let mediaRecorder: MediaRecorder | null = null;
@@ -37,7 +46,9 @@ export function RunReportPanel({
         // use flowid or smth
       }
 
-      for (const node of pending_nodes) {
+      const executionOrder = getExecutionOrder(nodes);
+
+      for (const node of executionOrder) {
         if (node.data?.func) {
           try {
             await node.data.func(node, debug_id);
@@ -47,6 +58,7 @@ export function RunReportPanel({
             ]);
           } catch (error) {
             setDoneNodes((prev) => [...prev, { node, status: Status.FAILED }]);
+            break; // Stop execution on failure
           }
         }
       }

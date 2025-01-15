@@ -16,6 +16,7 @@ export function NodeDetails({
   onRemoveQuestion,
 }: NodeDetailsProps) {
   const [newQuestion, setNewQuestion] = useState("");
+  const isAnswered = !!node.data.answer && node.data.answer !== "";
 
   useEffect(() => {
     if (node.data.pending_question) {
@@ -71,24 +72,26 @@ export function NodeDetails({
         <h3 className="text-xl font-semibold mb-2">Answer</h3>
         <p className="mb-6 text-gray-700">{node.data.answer}</p>
 
-        <form onSubmit={handleSubmit} className="mt-6 border-t pt-6">
-          <h3 className="text-xl font-semibold mb-2">Pending question:</h3>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newQuestion}
-              onChange={(e) => setNewQuestion(e.target.value)}
-              placeholder="Type your question here..."
-              className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-              Set
-            </button>
-          </div>
-        </form>
+        {!isAnswered && (
+          <form onSubmit={handleSubmit} className="mt-6 border-t pt-6">
+            <h3 className="text-xl font-semibold mb-2">Pending question:</h3>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+                placeholder="Type your question here..."
+                className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Set
+              </button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
