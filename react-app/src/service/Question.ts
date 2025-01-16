@@ -17,7 +17,7 @@ export enum Status {
 }
 
 // TODO NO SERVER SIDE AUTH ATM
-export const API_URL = "http://localhost/api";
+export const API_URL = "http://127.0.0.1:8000";
 
 export async function fetchQuestions(userId: string): Promise<Question[]> {
   if (userId) {

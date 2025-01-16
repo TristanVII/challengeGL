@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AppNode, DebugNode, QuestionNode } from "../nodes/types";
 import ReportNode from "./ReportNode";
 import { Status } from "../service/Question";
 import { DebugUtils } from "../utils/debugUtils";
 import { Edge } from "@xyflow/react";
-import { getExecutionOrder, topologicalSort } from "../utils/topologicalSort";
+import { getExecutionOrder } from "../utils/topologicalSort";
 
 interface RunReportPanelProps {
   isOpen: boolean;
@@ -21,15 +21,13 @@ export function RunReportPanel({
   pending_nodes,
   debugNode,
   nodes,
-  edges,
 }: RunReportPanelProps) {
   const [status, setStatus] = useState<Status>(Status.PENDING);
   const [doneNodes, setDoneNodes] = useState<
     { node: QuestionNode; status: Status }[]
   >([]);
-  // EXECUTION ORDER IS GOOD NOW SAVE
-  console.log(getExecutionOrder(nodes));
 
+  console.log(getExecutionOrder(nodes), nodes);
   const onRun = async () => {
     setStatus(Status.RUNNING);
     let mediaRecorder: MediaRecorder | null = null;
@@ -48,7 +46,8 @@ export function RunReportPanel({
 
       const executionOrder = getExecutionOrder(nodes);
 
-      for (const node of executionOrder) {
+      for (let i = 0; i < executionOrder.length; i++) {
+        const node = executionOrder[i];
         if (node.data?.func) {
           try {
             await node.data.func(node, debug_id);
@@ -125,6 +124,7 @@ export function RunReportPanel({
                   index={index}
                   key={index}
                   status={status}
+                  parent={nodes.find((n) => n.id === node.data.parent)}
                 />
               ))}
             </div>
@@ -137,6 +137,7 @@ export function RunReportPanel({
                   index={index}
                   key={index}
                   status={status}
+                  parent={nodes.find((n) => n.id === node.data.parent)}
                 />
               ))}
             </div>

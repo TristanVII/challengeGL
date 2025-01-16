@@ -5,10 +5,12 @@ export default function ReportNode({
   node,
   index,
   status,
+  parent,
 }: {
   node: QuestionNode;
   index: number;
   status: Status;
+  parent: QuestionNode | undefined;
 }) {
   return (
     <div
@@ -20,10 +22,8 @@ export default function ReportNode({
       </p>
       <div className="mt-4 space-y-3">
         <p className="text-gray-600">
-          <span className="font-medium text-gray-700">Previous Question:</span>{" "}
-          {node.data.question === "New Question"
-            ? node.data.pending_question
-            : node.data.question}
+          <span className="font-medium text-gray-700">Context:</span>{" "}
+          {parent?.data.answer || parent?.data.pending_question}
         </p>
         <p className="text-gray-600">
           <span className="font-medium text-gray-700">Pending Question:</span>{" "}

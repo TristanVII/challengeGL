@@ -157,14 +157,6 @@ export default function App() {
 
   const onConnect = useCallback(
     (params: any) => {
-      const targetHasParent = edges.some(
-        (edge) => edge.target === params.target
-      );
-      // Prevent connection if target already has a parent
-      if (targetHasParent) {
-        return;
-      }
-
       // top node / parent
       const sourceNode = nodes.find((node) => node.id === params.source);
       // bottom node / child

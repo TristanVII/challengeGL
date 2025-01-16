@@ -25,6 +25,7 @@ class OpenAIService:
             return "ERROR"
 
         try:
+            print("MESSAGE", message)
             response = openai.chat.completions.create(
                 model=model,
                 messages=list(message),
@@ -53,34 +54,3 @@ class OpenAIService:
         q.appendleft({"role": "system", "content": "You are a helpful assistant."})
         return q
     
-    # TODO: Make feedback array instead
-    def validate_feedback(self, feedback):
-        key = self.api_key
-        if not key:
-            raise Exception('API key required')
-        openai.api_key = key
-        question = f'''
-        #### IMPORTANT: Only answer with number 0 or 1
-        #### IMPORTANT: IF THE FOLLOWING IS TRUE, ANSWER WITH 1, ELSE ANSWER WITH 0
-
-        QUESTION: Given 3 questions that ask about UI/UX feedback. Determine wether the feedback is legitimate or not. If the feedback has no value or makes no sense or is not helpful, answer with 0. If the feedback is helpful and has value, answer with 1.
-        
-        Feedback1: {feedback.question1}
-        Feedback2: {feedback.question2}
-        Feedback3: {feedback.question3}
-
-
-        #### IMPORTANT: Only answer with number 0 or 1
-        '''
-        response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant, who can only answer with 0 or 1. 0 for False, 1 for True"},
-                {"role": "user", "content": question},
-            ],
-            max_tokens=1500,
-        )
-        return response.choices[0].message.content
-
-
-

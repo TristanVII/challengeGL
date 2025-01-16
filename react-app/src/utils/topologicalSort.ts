@@ -1,5 +1,6 @@
 import { AppNode } from "../nodes/types";
 
+// TODO: Currently theres a bug where you can create a cycle, and this will output empty array
 export const getExecutionOrder = (nodes: AppNode[]) => {
   // Create maps for quick lookups
   const nodeMap = new Map<string, AppNode>();
@@ -20,7 +21,6 @@ export const getExecutionOrder = (nodes: AppNode[]) => {
     }
   });
 
-  // Find root nodes (nodes without parents or with null parent)
   const rootNodes = nodes.filter((node) => !node.data.parent);
 
   const executionOrder: AppNode[] = [];
