@@ -23,7 +23,7 @@ import {
   postQuestion,
 } from "./service/Question";
 import { NodeDetails } from "./components/NodeDetails";
-import { AppNode, DebugNode } from "./nodes/types";
+import { AppNode, DebugNode, NodeSelectorInterface } from "./nodes/types";
 import { LeftSideBar } from "./components/LeftSideBar";
 import { NodeSelector } from "./components/NodeSelector";
 import { DebugUtils } from "./utils/debugUtils";
@@ -186,8 +186,162 @@ export default function App() {
 
       setEdges((eds) => addEdge({ ...params, animated: true }, eds));
     },
-    [edges, setEdges, nodes, setNodes]
+    [setEdges, nodes, setNodes]
   );
+
+  // Mock fake nodes VERY BAD WILL NEED TO CHANGE THIS LATER
+  // BTW this should not be an object. I made it an interface
+  // because I assumed that "categories" here is "Node library", and that
+  // I would add "Custome Nodes" in the future
+  const ALL_NODES: NodeSelectorInterface = {
+    categories: [
+      {
+        name: "AI",
+        description: "Using AI for various tasks",
+        nodes: [
+          {
+            name: "Ask AI",
+            func: addNewNode,
+            nodeId: "1",
+            favorite: false,
+          },
+          {
+            name: "Summarizer",
+            func: () => {},
+            nodeId: "2",
+            favorite: false,
+          },
+          {
+            name: "Categorizer",
+            func: () => {},
+            nodeId: "3",
+            favorite: false,
+          },
+          {
+            name: "Scorer",
+            func: () => {},
+            nodeId: "4",
+            favorite: false,
+          },
+          {
+            name: "Extractor",
+            func: () => {},
+            nodeId: "5",
+            favorite: false,
+          },
+        ],
+      },
+      {
+        name: "Notification",
+        description: "Send notifications to users",
+        nodes: [
+          {
+            name: "notification1",
+            func: () => {},
+            nodeId: "6",
+            favorite: false,
+          },
+          {
+            name: "notification2",
+            func: () => {},
+            nodeId: "7",
+            favorite: false,
+          },
+        ],
+      },
+      {
+        name: "Flow Basics",
+        description: "Essential components for workflow construction",
+        nodes: [
+          {
+            name: "Debug Node",
+            func: addDebugNode,
+            nodeId: "8",
+            favorite: false,
+          },
+          {
+            name: "Input",
+            func: () => {},
+            nodeId: "9",
+            favorite: false,
+          },
+          {
+            name: "Datetime",
+            func: () => {},
+            nodeId: "10",
+            favorite: false,
+          },
+        ],
+      },
+      {
+        name: "Favorite",
+        description: "Favorite nodes",
+        nodes: [
+          {
+            name: "Ask AI",
+            func: addNewNode,
+            nodeId: "1",
+            favorite: false,
+          },
+          {
+            name: "Summarizer",
+            func: () => {},
+            nodeId: "2",
+            favorite: false,
+          },
+          {
+            name: "Categorizer",
+            func: () => {},
+            nodeId: "3",
+            favorite: false,
+          },
+          {
+            name: "Scorer",
+            func: () => {},
+            nodeId: "4",
+            favorite: false,
+          },
+          {
+            name: "Extractor",
+            func: () => {},
+            nodeId: "5",
+            favorite: false,
+          },
+          {
+            name: "Debug Node",
+            func: addDebugNode,
+            nodeId: "8",
+            favorite: false,
+          },
+          {
+            name: "Input",
+            func: () => {},
+            nodeId: "9",
+            favorite: false,
+          },
+          {
+            name: "Datetime",
+            func: () => {},
+            nodeId: "10",
+            favorite: false,
+          },
+
+          {
+            name: "notification1",
+            func: () => {},
+            nodeId: "6",
+            favorite: false,
+          },
+          {
+            name: "notification2",
+            func: () => {},
+            nodeId: "7",
+            favorite: false,
+          },
+        ],
+      },
+    ],
+  };
 
   return (
     <ReactFlow
@@ -214,12 +368,7 @@ export default function App() {
       </Panel>
       <RunButton onRun={onRun} />
       <LeftSideBar>
-        <NodeSelector
-          addNode={addNewNode}
-          addDebugNode={addDebugNode}
-          debugNode={debugNode}
-          removeDebugNode={removeDebugNode}
-        />
+        <NodeSelector removeDebugNode={removeDebugNode} allNodes={ALL_NODES} />
       </LeftSideBar>
       <RunReportPanel
         isOpen={isPanelOpen}

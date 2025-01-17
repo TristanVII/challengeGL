@@ -4,6 +4,7 @@ import { AppNode } from "./types";
 import { postQuestion, Question } from "../service/Question";
 import QuestionNodeComponent from "./QuestionNode";
 import DebugNodeComponent from "./DebugNode";
+import { getFavoriteNodes } from "../utils/localStorage";
 
 export const initialNodes: AppNode[] = [];
 

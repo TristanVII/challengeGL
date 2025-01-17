@@ -25,3 +25,22 @@ export type DebugNode = Node<
   "debug-node"
 >;
 export type AppNode = QuestionNode;
+
+// type for ALL_NODES
+
+export interface NodeItem {
+  name: string;
+  func: () => void;
+  nodeId: string;
+  favorite: boolean;
+}
+
+export interface Category {
+  name: string;
+  description: string;
+  nodes: NodeItem[];
+}
+
+export interface NodeSelectorInterface {
+  categories: Category[];
+}
