@@ -46,6 +46,13 @@ async def get_all_questions(id: str):
         question['_id'] = str(question['_id'])
     return json_util.dumps(q)
 
+@app.get("/question/{id}")
+async def get_question(id: str):
+    question_bank = collections['question_bank']
+    q = question_bank.get_from_id(id)
+    q['_id'] = str(q['_id'])
+    return q
+
 @app.post("/question")
 async def post_question(question: Question):
     debug_id = None
