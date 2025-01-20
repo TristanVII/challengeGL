@@ -1,6 +1,9 @@
 Started January 5th.
 My own take on https://github.com/gumloop/challenge
 
+Highly recommend checking out Gumloop.
+Gumloop: https://www.gumloop.com/hub
+
 # Tech Stack
 
 ## Frontend
