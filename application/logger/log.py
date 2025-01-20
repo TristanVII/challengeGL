@@ -9,7 +9,7 @@ def load_log_conf(file):
     Returns:
         logger: Logger
     """
-    return { 'info': lambda x: print(x)}
+    # return { 'info': lambda x: print(x)}
     with open(file, 'r') as f:
         log_config = yaml.safe_load(f.read())
         logging.config.dictConfig(log_config)

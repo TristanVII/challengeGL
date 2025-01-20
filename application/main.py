@@ -14,6 +14,8 @@ import time
 
 logger = load_log_conf('./log_conf.yml')
 LOG_FILE = "/tmp/gum-logs/logs.log"
+print('KEY: ', os.getenv('OPENAI_API_KEY'))
+
 
 collections = {}
 @asynccontextmanager
@@ -63,9 +65,9 @@ async def post_question(question: Question):
         logger.info(f"REQUEST: /question Received for debug_id: {debug_id}")
 
     open_AI_service = OpenAIService(collections['question_bank'], None, None)
-    # answer = open_AI_service.ask_question(question.question, question.question_parent_id)
-    answer = "test"
-    time.sleep(5)
+    answer = open_AI_service.ask_question(question.question, question.question_parent_id)
+    # answer = "test"
+    # time.sleep(5)
     if debug_id:
         logger.info(f"RESPONSE: OpenAI Received {json_util.dumps(answer)} for debug_id: {debug_id}")
 

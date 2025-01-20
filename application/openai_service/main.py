@@ -7,7 +7,8 @@ import os
 class OpenAIService:
     def __init__(self, question_bank: QuestionBank, feedback_bank: FeedbackBank, api_key=None):
         # TODO: ADD UR API KEY
-        self.api_key = api_key or os.getenv('OPENAI_API_KEY')
+        self.api_key = api_key if api_key else os.getenv('OPENAI_API_KEY')
+        print('APIKEY', self.api_key)
         self.question_bank = question_bank
         self.feedback_bank = feedback_bank
 
@@ -22,7 +23,7 @@ class OpenAIService:
                 message = self.get_message_history(parent_id)
             message.append({"role": "user", "content": query})
         except Exception as e:
-            return "ERROR"
+            return str(e)
 
         try:
             print("MESSAGE", message)
