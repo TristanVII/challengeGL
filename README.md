@@ -1,5 +1,7 @@
-Started January 5th.
-My own take on https://github.com/gumloop/challenge
+Started January 5th. My own take on https://github.com/gumloop/challenge
+
+My live DEMO: https://youtu.be/6nQl8go3UV4
+
 
 Highly recommend checking out Gumloop.
 Gumloop: https://www.gumloop.com/hub
