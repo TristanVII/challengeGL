@@ -10,7 +10,7 @@ export async function postFeedBack(
   const options = {
     method: "POST",
     headers: {
-      Authorization: "Bearer d29179267b414180b0327f337f2c6399",
+      Authorization: "Bearer <TOKEN>",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
